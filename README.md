@@ -22,7 +22,7 @@ This repository contains the **BASE** structure that i use to start screepting ð
 
     ```
     
-    To get your destination folder for your steam app check in the lower left corner
+    To get your destination folder for your steam screeps app project, check in the lower left corner
     for a button labeled as `Open local folder` (Check figure below).
 
     ![The button](./docs/img/setup_0001.png)
