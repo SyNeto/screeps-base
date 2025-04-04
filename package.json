@@ -1,0 +1,19 @@
+{
+  "name": "screeps_base",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/lodash": "^4.17.16",
+    "@types/screeps": "^3.3.8",
+    "rollup": "^4.39.0"
+  }
+}
