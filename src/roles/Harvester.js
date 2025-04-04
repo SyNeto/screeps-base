@@ -1,23 +1,20 @@
-export default class Harvester {
+import BaseRole from './Base';
 
-    constructor(creep) {
-        this.creep = creep;
-    }
-
+export default class Harvester extends BaseRole {
     run() {
         const { creep } = this;
 
-        if (creep.memory.harvesting && creep.store.getFreeCapacity() === 0) {
-            creep.memory.harvesting = false;
+        if (this.working && creep.store.getFreeCapacity() === 0) {
+            this.working = false;
             creep.say('📤 deliver');
         }
 
-        if (!creep.memory.harvesting && creep.store[RESOURCE_ENERGY] === 0) {
-            creep.memory.harvesting = true;
+        if (!this.working && creep.store[RESOURCE_ENERGY] === 0) {
+            this.working = true;
             creep.say('⛏️ harvest');
         }
 
-        if (creep.memory.harvesting) {
+        if (this.working) {
             const sources = creep.room.find(FIND_SOURCES);
             if (sources.length > 0) {
                 const source = sources[0];

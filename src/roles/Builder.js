@@ -1,23 +1,21 @@
-export default class Builder {
+import BaseRole from './Base';
 
-  constructor(creep) {
-    this.creep = creep;
-  }
+export default class Builder extends BaseRole {
 
   run() {
     const { creep } = this;
 
-    if(creep.memory.building && creep.store[RESOURCE_ENERGY] === 0) {
-      creep.memory.building = false;
+    if(this.working && creep.store[RESOURCE_ENERGY] === 0) {
+      this.working = false;
       creep.say('🔄 harvest');
     }
 
-    if(!creep.memory.building && creep.store.getFreeCapacity() === 0) {
+    if(!this.working && creep.store.getFreeCapacity() === 0) {
       creep.memory.building = true;
       creep.say('🚧 build');
     }
 
-    if(creep.memory.building) {
+    if(this.working) {
       const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
       if(targets.length) {
         if(creep.build(targets[0]) === ERR_NOT_IN_RANGE) {

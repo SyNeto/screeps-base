@@ -1,22 +1,20 @@
-export default class Upgrader {
+import BaseRole from './Base';
 
-  constructor(creep) {
-    this.creep = creep;
-  }
+export default class Upgrader extends BaseRole {
 
   run() {
     const { creep } = this;
 
-    if(creep.memory.upgrading && creep.stroe[RESOURCE_ENERGY] === 0) {
-      creep.memory.upgrading = false;
+    if(this.working && creep.stroe[RESOURCE_ENERGY] === 0) {
+      this.working = false;
       creep.say('🔄 harvest');
     }
-    if(!creep.memory.upgrading && creep.store.getFreeCapacity() === 0) {
+    if(!this.working && creep.store.getFreeCapacity() === 0) {
       creep.memory.upgrading = true;
       creep.say('⚡ upgrade');
     }
 
-    if(creep.memory.upgrading) {
+    if(this.working) {
       const controller = creep.room.controller;
       if(creep.upgradeController(controller) === ERR_NOT_IN_RANGE) {
         creep.moveTo(controller, {visualizePathStyle: {stroke: '#ffffff'}});
