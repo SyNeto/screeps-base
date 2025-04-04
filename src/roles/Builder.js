@@ -11,7 +11,7 @@ export default class Builder extends BaseRole {
     }
 
     if(!this.working && creep.store.getFreeCapacity() === 0) {
-      creep.memory.building = true;
+      this.working = true;
       creep.say('🚧 build');
     }
 

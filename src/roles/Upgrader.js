@@ -5,12 +5,12 @@ export default class Upgrader extends BaseRole {
   run() {
     const { creep } = this;
 
-    if(this.working && creep.stroe[RESOURCE_ENERGY] === 0) {
+    if(this.working && creep.store[RESOURCE_ENERGY] === 0) {
       this.working = false;
       creep.say('🔄 harvest');
     }
     if(!this.working && creep.store.getFreeCapacity() === 0) {
-      creep.memory.upgrading = true;
+      this.working = true;
       creep.say('⚡ upgrade');
     }
 
