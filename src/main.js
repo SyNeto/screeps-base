@@ -1,4 +1,9 @@
+import './prototypes';
 
-module.exports.loop = () => {
-  console.log('Tick: Hello, Screeps!');
-}
+export const loop = () => {
+  for (const name in Game.creeps) {
+    const creep = Game.creeps[name];
+    creep.runRole();
+  }
+};
+
