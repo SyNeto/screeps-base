@@ -10,7 +10,6 @@
  */
 
 /**
- * @param {import('rollup').Plugin} rollup
  * @returns {import('rollup').Plugin}
  */
 function patchExportsLoop() {
