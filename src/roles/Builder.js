@@ -31,9 +31,7 @@ export default class Builder extends BaseRole {
         }
       }
     } else {
-      // harvesting phase
-      if(!this.target || this.target.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-        // if no target or target is full, find a source
+      if(!this.target) {
         const sources = creep.room.find(FIND_SOURCES);
         if(sources.length > 0) {
           this.target = sources[0];
