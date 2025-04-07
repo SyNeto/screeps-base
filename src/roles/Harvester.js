@@ -5,14 +5,14 @@ export default class Harvester extends BaseRole {
         const { creep } = this;
 
         if (this.working && creep.store.getFreeCapacity() === 0) {
-            this.working = false;
             this.target = null;
+            this.working = false;
             creep.say('📤 deliver');
         }
 
         if (!this.working && creep.store[RESOURCE_ENERGY] === 0) {
-            this.working = true;
             this.target = null;
+            this.working = true;
             creep.say('⛏️ harvest');
         }
 
@@ -29,8 +29,8 @@ export default class Harvester extends BaseRole {
                 }
             }
         } else {
-            if (!this.target || this.target.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-                const targets = creep.room.find(FIND_STRUCTURES, {
+            if (!this.target) {
+                const targets = creep.room.find(FIND_MY_STRUCTURES, {
                     filter: structure =>
                         [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER].includes(structure.structureType) &&
                         structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
@@ -39,9 +39,20 @@ export default class Harvester extends BaseRole {
                     this.target = targets[0];
                 }
             }
-            if (this.target) {
+            if (this.target && this.target.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 if (creep.transfer(this.target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(this.target, { visualizePathStyle: { stroke: '#ffffff' } });
+                }
+            } else {
+                creep.say('😕')
+                const targets = creep.room.find(FIND_MY_STRUCTURES, {
+                    filter: structure =>
+                        [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER].includes(structure.structureType) &&
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                });
+                creep.moveTo(Game.spawns.Spawn1);
+                if (targets.length > 0) {
+                    this.target = targets[0];
                 }
             }
         }
