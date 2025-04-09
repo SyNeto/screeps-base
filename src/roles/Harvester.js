@@ -1,65 +1,57 @@
-import BaseRole from './Base';
+import BaseRole from "./Base";
+
+
+const HARVESTER_STATES = {
+  harvesting: {
+    transition: (role) => {
+      if (role.creep.store.getFreeCapacity() === 0) {
+        return 'delivering';
+      }
+      return null;
+    },
+    run: (role) => {
+      const sources = role.creep.room.find(FIND_SOURCES);
+      if (sources.length > 0) {
+        const source = sources[1]; // To-Do: Refactor this to use the closest source
+        if (role.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+          role.creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } });
+        }
+      }
+    }
+  },
+  delivering: {
+    transition: (role) => {
+      if (role.creep.store[RESOURCE_ENERGY] === 0) {
+        return 'harvesting';
+      }
+      return null;
+    },
+    run: (role) => {
+      const targets = role.creep.room.find(FIND_MY_STRUCTURES, {
+        filter: structure =>
+          [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER].includes(structure.structureType) &&
+          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0 
+      });
+      if (targets.length > 0) {
+        if (role.creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+          role.creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+        }
+      }
+    }
+  }
+};
+
 
 export default class Harvester extends BaseRole {
 
-  resourceType = RESOURCE_ENERGY;
-  validStructures = [
-    STRUCTURE_SPAWN,
-    STRUCTURE_EXTENSION,
-    STRUCTURE_TOWER
-  ];
+  states = HARVESTER_STATES;
+  
+  getInitialState() {
+    return 'harvesting';
+  }
 
-  run() {
+  onEnterState(newState) {
     const { creep } = this;
-
-    if (this.working && creep.store.getFreeCapacity() === 0) {
-      this.target = null;
-      this.working = false;
-      creep.say('📤 deliver');
-    }
-
-    if (!this.working && creep.store[RESOURCE_ENERGY] === 0) {
-      this.target = null;
-      this.working = true;
-      creep.say('⛏️ harvest');
-    }
-
-    if (this.working) {
-      const hasTarget = !!this.target;
-      if (hasTarget) {
-        if (creep.harvest(this.target) === ERR_NOT_IN_RANGE) {
-          creep.moveTo(this.target, { visualizePathStyle: { stroke: '#ffaa00' } });
-        }
-      } else {
-        const resources = creep.room.find(FIND_SOURCES)
-        if (resources.length > 0) {
-          this.target = resources[Math.floor(Math.random() * resources.length)];
-        }
-      }
-    } else {
-      const hasTarget = !!this.target;
-      const targetFreeCapacity = this.target ? this.target.store.getFreeCapacity(RESOURCE_ENERGY) : 0;
-      if (hasTarget) {
-        if (targetFreeCapacity > 0) {
-          if (creep.transfer(this.target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(this.target, { visualizePathStyle: { stroke: '#ffffff' } });
-          }
-        } else {
-          this.target = null;
-        }
-      } else {
-        console.log('No target');
-        const targets = creep.room.find(FIND_MY_STRUCTURES, {
-          filter: structure =>
-            [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER].includes(structure.structureType) &&
-            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-        });
-        if (targets.length > 0) {
-          this.target = targets[Math.floor(Math.random() * targets.length)];
-        } else {
-          creep.say('No target');
-        }
-      }
-    }
+    creep.say(newState === 'delivering' ?  '📤 delivering' : '⛏️ harvesting');
   }
 }

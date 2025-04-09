@@ -10,12 +10,6 @@
  * 
  */
 export default class BaseRole {
-
-  /**
-   * Current state of the role.
-   * @type {string|null}
-   */
-  currentState = null;
   /**
    * States configuration object.
    * Must be defined in the subclass.
@@ -26,9 +20,7 @@ export default class BaseRole {
    *     transition: (roleInstance) => ...,
    *     run: (roleInstance) => ...
    *   },
-   *   state2: {
-   *     transition: (roleInstance) => ...
-   *   }
+   *   // Other states
    * }
    * 
    * @type {object}
@@ -41,6 +33,22 @@ export default class BaseRole {
    */
   constructor(creep){
     this.creep = creep;
+  }
+
+  /**
+   * Get the creep current state from memory.
+   * @type {string|null}
+   * */
+  get currentState() {
+    return this.creep.memory.currentState;
+  }
+
+  /**
+   * Set the creep current state to memory.
+   * @type {void}
+   */
+  set currentState(state) {
+    this.creep.memory.currentState = state;
   }
 
   /**
@@ -87,6 +95,8 @@ export default class BaseRole {
   /**
    * This method is called every tick.
    * 
+   * It runs the current state's transition and run methods.
+   * 
    * @trows {Error} If the current state is not defined in the states configuration.
    * @returns {void}
    */
@@ -105,6 +115,12 @@ export default class BaseRole {
       if(newState && newState !== this.currentState) {
         this.changeState(newState);
       }
+    }
+
+    if(stateConfig.run && typeof stateConfig.run === 'function') {
+      stateConfig.run(this);
+    } else {
+      throw new Error(`No run method found for ${this.currentState}`);
     }
   }
 }

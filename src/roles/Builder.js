@@ -1,47 +1,50 @@
-import BaseRole from './Base';
+import BaseRole from "./Base";
+
+const BUILDER_STATES = {
+  harvesting : {
+    transition: (role) => {
+      if (role.creep.store.getFreeCapacity() === 0) {
+        return 'building';
+      }
+      return null;
+    },
+    run: (role) => {
+      const sources = role.creep.room.find(FIND_SOURCES);
+      if (sources.length > 0) {
+        const source = sources[1]; // To-Do: Refactor this to use the closest source
+        if (role.creep.harvest(source) === ERR_NOT_IN_RANGE) {
+          role.creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } });
+        }
+      }
+    }
+  },
+  building: {
+    transition: (role) => {
+      if (role.creep.store[RESOURCE_ENERGY] === 0) {
+        return 'harvesting';
+      }
+      return null;
+    },
+    run: (role) => {
+      const targets = role.creep.room.find(FIND_CONSTRUCTION_SITES);
+      if (targets.length > 0) {
+        if (role.creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
+          role.creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+        }
+      }
+    }
+  }
+}
 
 export default class Builder extends BaseRole {
+  states = BUILDER_STATES;
 
-  run() {
+  getInitialState() {
+    return 'harvesting';
+  }
+
+  onEnterState(newState) {
     const { creep } = this;
-
-    if(this.working && creep.store[RESOURCE_ENERGY] === 0) {
-      this.working = false;
-      this.target = null;
-      creep.say('🔄 harvest');
-    }
-
-    if(!this.working && creep.store.getFreeCapacity() === 0) {
-      this.working = true;
-      this.target = null;
-      creep.say('🚧 build');
-    }
-
-    if(this.working) {
-      // building phase
-      if (!this.target || this.target.progress == this.target.progressTotal) {
-        const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-        if (targets.length > 0) {
-          this.target = targets[0];
-        }
-      }
-      if (this.target) {
-        if (creep.build(this.target) === ERR_NOT_IN_RANGE) {
-          creep.moveTo(this.target, { visualizePathStyle: { stroke: '#ffffff' } });
-        }
-      }
-    } else {
-      if(!this.target) {
-        const sources = creep.room.find(FIND_SOURCES);
-        if(sources.length > 0) {
-          this.target = sources[0];
-        }
-      }
-      if(this.target) {
-        if(creep.harvest(this.target) === ERR_NOT_IN_RANGE) {
-          creep.moveTo(this.target, { visualizePathStyle: { stroke: '#ffaa00' } });
-        }
-      }
-    }
+    creep.say(newState === 'building' ? '🔨 building' : '⛏️ harvesting');
   }
 }

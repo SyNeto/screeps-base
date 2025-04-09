@@ -1,4 +1,4 @@
-import { Roles } from '../roles';
+import { Roles } from "../roles";
 
 Creep.prototype.runRole = function () {
   const role = this.memory.role;
