@@ -45,10 +45,33 @@ export default class BaseRole {
 
   /**
    * Set the creep current state to memory.
+   * @param {string} state - The new state to set.
    * @type {void}
    */
   set currentState(state) {
     this.creep.memory.currentState = state;
+  }
+
+  /**
+   * Get the creep target state from memory.
+   * @type The target object or null if not set or if it's invalid.
+   */
+  get target() {
+    const targetId = this.creep.memory.targetId;
+    if (!targetId) return null;
+    return Game.getObjectById(targetId);
+  }
+
+  /**
+   * Get the creep target state from memory. 
+   * @type {void}
+   */
+  set target(targetObject) {
+    if (targetObject && targetObject.id) {
+      this.creep.memory.targetId = targetObject.id;
+    } else {
+      delete this.creep.memory.targetId;
+    }
   }
 
   /**
@@ -88,8 +111,7 @@ export default class BaseRole {
    * @returns {void}
    */
   onEnterState(newState) {
-    // Clean flags, memory, couters, etc.
-    return;
+    this.target = null;
   }
 
   /**
@@ -105,7 +127,7 @@ export default class BaseRole {
       this.currentState = this.getInitialState();  
     }
 
-    const stateConfig = this.states[this.currentState];
+    let stateConfig = this.states[this.currentState];
     if(!stateConfig) {
       throw new Error(`No state config found for ${this.currentState}`);
     }
@@ -114,6 +136,7 @@ export default class BaseRole {
       const newState = stateConfig.transition(this);
       if(newState && newState !== this.currentState) {
         this.changeState(newState);
+        stateConfig = this.states[newState];
       }
     }
 
