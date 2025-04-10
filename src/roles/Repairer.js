@@ -9,12 +9,15 @@ const REPAIRER_STATES = {
       return null;
     },
     run: (role) => {
-      const sources = role.creep.room.find(FIND_SOURCES);
-      if (sources.length > 0) {
-        const source = sources[1]; // To-Do: Refactor this to use the closest source
-        if (role.creep.harvest(source) === ERR_NOT_IN_RANGE) {
-          role.creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } });
+      if (!role.target || role.target.energy === 0) {
+        const sources = role.creep.room.find(FIND_SOURCES);
+        if (sources.length > 0) {
+          role.target = sources[1];
         }
+        return;
+      }
+      if (role.creep.harvest(role.target) === ERR_NOT_IN_RANGE) {
+        role.creep.moveTo(role.target, { visualizePathStyle: { stroke: '#ffaa00' } });
       }
     }
   },
@@ -26,15 +29,22 @@ const REPAIRER_STATES = {
       return null;
     },
     run: (role) => {
-      const targets = role.creep.room.find(FIND_STRUCTURES, {
-        filter: structure => structure.hits < structure.hitsMax && 
-          [STRUCTURE_ROAD, STRUCTURE_CONTAINER, STRUCTURE_WALL].includes(structure.structureType)
-      });
-      if (targets.length > 0) {
-        if (role.creep.repair(targets[0]) === ERR_NOT_IN_RANGE) {
-          role.creep.moveTo(targets[0], { visualizePathStyle: { stroke: '#ffffff' } });
+      if (!role.target || role.target.hits === role.target.hitsMax) {
+        const targets = role.creep.room.find(FIND_STRUCTURES, {
+          filter: structure => structure.hits < structure.hitsMax &&
+            [STRUCTURE_ROAD, STRUCTURE_CONTAINER, STRUCTURE_WALL].includes(structure.structureType)
+        });
+        if (!!targets && targets.length > 0) {
+          role.target = targets[Math.floor(Math.random() * targets.length)];
+        } else {
+          console.log(`[WARNING] No repair targets found for ${role.creep.name}`);
         }
+        return;
       }
+      if (role.creep.repair(role.target) === ERR_NOT_IN_RANGE) {
+        role.creep.moveTo(role.target, { visualizePathStyle: { stroke: '#ffffff' } });
+      }
+
     }
   }
 };
@@ -48,6 +58,7 @@ export default class Repairer extends BaseRole {
 
   onEnterState(newState) {
     const { creep } = this;
+    super.onEnterState(this, newState);
     creep.say(newState === 'repairing' ? '🔧 repairing' : '⛏️ harvesting');
   }
 }
